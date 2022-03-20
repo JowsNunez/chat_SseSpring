@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="messages">
+
+    </div>
+
+    <script>
+        let eventSource =  new EventSource("http://localhost:6500/subscribe?userId=012");
+
+        console.log(eventSource);
+
+        eventSource.addEventListener("message", ev => {
+            let data = JSON.parse(ev.data);
+           document.getElementById("messages").innerHTML += `
+                        <div>
+                            <h1>message: ${data.message}</h1>
+                        </div>
+                        `;
+        })
+
+    </script>
+
+</body>
+</html>
