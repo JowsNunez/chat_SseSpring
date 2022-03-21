@@ -2,10 +2,7 @@ package mx.great.controllers;
 
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.json.JSONObject;
 
@@ -54,6 +51,37 @@ public class MessageController {
         }catch (IOException e){
             emmiters.remove(sseEmiter);
         }
+
+    }
+
+    @GetMapping("/dispatch")
+    public void writting (@RequestParam Integer userId){
+        String data = new JSONObject()
+                .put("state","writting...")
+                .toString();
+
+        SseEmitter sseEmiter = emmiters.get(userId);
+        try{
+            sseEmiter.send(SseEmitter.event().name("writting").data(data));
+        }catch (IOException e){
+            emmiters.remove(sseEmiter);
+        }
+
+
+    }
+    @GetMapping("/dispatch/clean")
+    public void clean (@RequestParam Integer userId){
+        String data = new JSONObject()
+                .put("state","writting...")
+                .toString();
+
+        SseEmitter sseEmiter = emmiters.get(userId);
+        try{
+            sseEmiter.send(SseEmitter.event().name("clean").data(data));
+        }catch (IOException e){
+            emmiters.remove(sseEmiter);
+        }
+
 
     }
 }

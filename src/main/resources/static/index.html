@@ -3,23 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        #message{
+            width: 90%;
+            height: auto;
+            border-radius: 3px;
+            background: cadetblue;
+            margin: 5px 0px;
+            padding: 2px;
+            text-align: justify;
+            box-sizing: border-box;
+
+        }
+        #message::after{
+            content:"";
+            width: 10%;
+            height: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div id="messages">
+    <div id="messages" style="width: 250px;height: 200px; border: 1px solid;
+                        border-radius: 10px;
+                        overflow-y: scroll;
+                        position: relative;
+
+
+                            ">
+
+        <span id="trol" style="position: absolute; bottom: 0;"></span>
 
     </div>
 
+
+
+    <input type="text" name="text" placeholder="write" id="itext"/>
+    <input type="text" name="text" placeholder="write" id="idUser"/>
+
+    <button type="button" id="buttons"> Send</button>
+
     <script>
-        let eventSource =  new EventSource("http://localhost:6500/subscribe?userId=012");
+        let randomId  =()=>{
+            let random =Math.floor( Math.random()*10000)
+            if(random>999){
+                return random;
+            }
+        }
+        let userId=randomId();
+        let eventSource =  new EventSource("http://localhost:6500/subscribe?userId="+userId);
 
         console.log(eventSource);
+        let button = document.getElementById("buttons");
 
+        button.addEventListener("click", e=>
+        {
+            fetch("http://localhost:6500/dispatch?userId="+idUser.value+"&message="+text.value,{method:"POST"})
+            text.value=""
+            fetch("http://localhost:6500/dispatch/clean?userId="+idUser.value,
+                {
+                    method: "GET",
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                });
+        })
         eventSource.addEventListener("message", ev => {
             let data = JSON.parse(ev.data);
            document.getElementById("messages").innerHTML += `
-                        <div>
-                            <h1>message: ${data.message}</h1>
+                        <div id="message">
+                             ${data.message}
                         </div>
+                        `;
+        })
+        let text = document.getElementById("itext");
+        let idUser = document.getElementById("idUser");
+        text.addEventListener("input", async ev => {
+            let content = text.value;
+            console.log(content)
+            if(content.length>0) {
+                await fetch("http://localhost:6500/dispatch?userId="+idUser.value,
+                    {
+                        method: "GET",
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // 'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                    });
+            }else{
+
+                await fetch("http://localhost:6500/dispatch/clean?userId="+idUser.value,
+                    {
+                        method: "GET",
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // 'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                    });
+            }
+        })
+        eventSource.addEventListener("writting", ev => {
+            let data = JSON.parse(ev.data);
+
+            document.getElementById("trol").innerHTML = `
+                        <div>
+                           Writing...
+                        </div>
+                        `;
+        })
+        eventSource.addEventListener("clean", ev => {
+            let data = JSON.parse(ev.data);
+
+            document.getElementById("trol").innerHTML = `
+
                         `;
         })
 
